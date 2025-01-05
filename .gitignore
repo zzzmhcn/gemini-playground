@@ -104,6 +104,7 @@ web_modules/
 
 .cache
 .parcel-cache
+.prettierrc
 
 # Next.js build output
 
