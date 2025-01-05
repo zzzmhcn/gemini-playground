@@ -224,7 +224,7 @@ export class MultimodalLiveClient extends EventEmitter {
 
         const data = { realtimeInput: { mediaChunks: chunks } };
         this._sendDirect(data);
-        this.log(`client.realtimeInput`, message);
+        //this.log(`client.realtimeInput`, message);
     }
 
     /**
