@@ -69,6 +69,7 @@ async function handleWebSocket(req: Request): Promise<Response> {
 
 async function handleRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
+  console.log('Request URL:', req.url);
 
   // WebSocket 处理
   if (req.headers.get("Upgrade")?.toLowerCase() === "websocket") {
@@ -82,7 +83,11 @@ async function handleRequest(req: Request): Promise<Response> {
       filePath = '/index.html';
     }
 
-    const file = await Deno.readFile(`./static${filePath}`);
+    // 修改文件路径以匹配实际目录结构
+    const fullPath = `${Deno.cwd()}/src/static${filePath}`;
+    console.log('Trying to read file from:', fullPath);
+
+    const file = await Deno.readFile(fullPath);
     const contentType = getContentType(filePath);
 
     return new Response(file, {
@@ -91,8 +96,13 @@ async function handleRequest(req: Request): Promise<Response> {
       },
     });
   } catch (e) {
-    console.error('File not found:', url.pathname);
-    return new Response('Not Found', { status: 404 });
+    console.error('Error details:', e);
+    return new Response('Not Found', { 
+      status: 404,
+      headers: {
+        'content-type': 'text/plain;charset=UTF-8',
+      }
+    });
   }
 }
 
