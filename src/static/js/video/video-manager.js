@@ -245,14 +245,11 @@ export class VideoManager {
         
         try {
             Logger.info('Flipping camera');
+
             this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
             
-            // 停止当前视频流
-            if (this.stream) {
-                this.stream.getTracks().forEach(track => track.stop());
-            }
-            
-            // 重新启动视频流
+           this.stop();
+
             await this.start(this.onFrame);
             Logger.info('Camera flipped successfully');
         } catch (error) {

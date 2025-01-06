@@ -95,7 +95,7 @@ export class VideoRecorder {
                         this.frameCanvas.width,
                         this.frameCanvas.height
                     );
-
+  
                     // Convert to JPEG
                     const jpegData = this.frameCanvas.toDataURL('image/jpeg', this.options.quality);
                     // Remove data URL prefix
@@ -107,7 +107,7 @@ export class VideoRecorder {
 
                     this.frameCount++;
                     const size = Math.round(base64Data.length / 1024);
-                    //Logger.debug(`Frame #${this.frameCount} captured (${size}KB)`);
+                    Logger.debug(`Frame #${this.frameCount} captured (${size}KB)`);
                     
                     if (!base64Data) {
                         Logger.error('Empty frame data');
