@@ -17,15 +17,25 @@
     <div id="app">
         <div class="settings">
             <input type="password" id="api-key" placeholder="Please Input Gemini API Key" />
+            <button id="config-toggle" class="material-symbols-outlined">settings</button>
         </div>
-        <div class="settings">
-            <select id="voice-select">
-                <option value="Puck">Puck (Male)</option>
-                <option value="Charon">Charon (Male)</option>
-                <option value="Fenrir">Fenrir (Male)</option>
-                <option value="Kore">Kore (Female)</option>
-                <option value="Aoede" selected>Aoede (Female)</option>
-            </select>
+        <div id="config-container" class="hidden-mobile">
+            <div class="config-wrapper">
+                <select id="voice-select">
+                    <option value="Puck">Puck (Male)</option>
+                    <option value="Charon">Charon (Male)</option>
+                    <option value="Fenrir">Fenrir (Male)</option>
+                    <option value="Kore">Kore (Female)</option>
+                    <option value="Aoede" selected>Aoede (Female)</option>
+                </select>
+                <div class="fps-container">
+                    <span class="fps-label">FPS: </span>
+                    <input type="number" id="fps-input" placeholder="Video FPS" value="2" min="1" max="30" step="1"/>
+                    <span class="fps-help">Higher FPS need more network bandwidth</span>
+                </div>
+                <textarea id="system-instruction" placeholder="Enter custom system instructions..." rows="3"></textarea>
+                <button id="apply-config">Confirm</button>
+            </div>
         </div>
         <button id="connect-button">Connect</button>
         <div id="logs-container"></div>

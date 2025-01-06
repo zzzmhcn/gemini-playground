@@ -127,13 +127,14 @@ export class VideoManager {
      * @returns {Promise<boolean>} Success status
      * @throws {ApplicationError} If video capture fails
      */
-    async start(onFrame) {
+    async start(fps, onFrame) {
         try {
             this.onFrame = onFrame;
             
             Logger.info('Starting video manager');
             this.videoContainer.style.display = 'block';
-            this.videoRecorder = new VideoRecorder();
+            console.log("fps:",fps);
+            this.videoRecorder = new VideoRecorder({fps: fps});
                         
             await this.videoRecorder.start(this.previewVideo,this.facingMode, (base64Data) => {
                 if (!this.isActive) {

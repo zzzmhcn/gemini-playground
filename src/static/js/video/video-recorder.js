@@ -24,8 +24,8 @@ export class VideoRecorder {
         this.frameCtx = this.frameCanvas.getContext('2d');
         this.captureInterval = null;
         this.options = {
-            fps: 15, // Reduced default FPS
-            quality: 0.7,
+            fps: options.fps || 1, // 使用传入的fps,默认为1
+            quality: 0.6,
             width: 640,
             height: 480,
             maxFrameSize: 100 * 1024, // 100KB max per frame
@@ -34,6 +34,7 @@ export class VideoRecorder {
         this.frameCount = 0; // Add frame counter for debugging
         this.actualWidth = 640;
         this.actualHeight = 480;
+        console.log(this.options);  
     }
 
     /**
@@ -62,7 +63,7 @@ export class VideoRecorder {
             this.actualWidth = settings.width;
             this.actualHeight = settings.height;
 
-            // 计算保持宽高比的情况下，限制高度为480的新尺寸
+            // 计算保持宽高比的情况下，限制高度最大为480的
             if (this.actualHeight > 480) {
                 const aspectRatio = this.actualWidth / this.actualHeight;
                 this.actualHeight = 480;

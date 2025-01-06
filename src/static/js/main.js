@@ -29,11 +29,20 @@ const screenPreview = document.getElementById('screen-preview');
 const inputAudioVisualizer = document.getElementById('input-audio-visualizer');
 const apiKeyInput = document.getElementById('api-key');
 const voiceSelect = document.getElementById('voice-select');
-const flipCameraButton = document.getElementById('flip-camera');
+const fpsInput = document.getElementById('fps-input');
+const configToggle = document.getElementById('config-toggle');
+const configContainer = document.getElementById('config-container');
+const systemInstructionInput = document.getElementById('system-instruction');
+systemInstructionInput.value = CONFIG.SYSTEM_INSTRUCTION.TEXT;
+const applyConfigButton = document.getElementById('apply-config');
+
 
 // Load saved values from localStorage
 const savedApiKey = localStorage.getItem('gemini_api_key');
 const savedVoice = localStorage.getItem('gemini_voice');
+const savedFPS = localStorage.getItem('video_fps');
+const savedSystemInstruction = localStorage.getItem('system_instruction');
+
 
 if (savedApiKey) {
     apiKeyInput.value = savedApiKey;
@@ -41,6 +50,25 @@ if (savedApiKey) {
 if (savedVoice) {
     voiceSelect.value = savedVoice;
 }
+
+if (savedFPS) {
+    fpsInput.value = savedFPS;
+}
+if (savedSystemInstruction) {
+    systemInstructionInput.value = savedSystemInstruction;
+    CONFIG.SYSTEM_INSTRUCTION.TEXT = savedSystemInstruction;
+}
+
+// Handle configuration panel toggle
+configToggle.addEventListener('click', () => {
+    configContainer.classList.toggle('active');
+    configToggle.classList.toggle('active');
+});
+
+applyConfigButton.addEventListener('click', () => {
+    configContainer.classList.toggle('active');
+    configToggle.classList.toggle('active');
+});
 
 // State variables
 let isRecording = false;
@@ -223,6 +251,7 @@ async function connectToWebsocket() {
     // Save values to localStorage
     localStorage.setItem('gemini_api_key', apiKeyInput.value);
     localStorage.setItem('gemini_voice', voiceSelect.value);
+    localStorage.setItem('system_instruction', systemInstructionInput.value);
 
     const config = {
         model: CONFIG.API.MODEL_NAME,
@@ -239,7 +268,7 @@ async function connectToWebsocket() {
         },
         systemInstruction: {
             parts: [{
-                text: CONFIG.SYSTEM_INSTRUCTION.TEXT     // You can change system instruction in the config.js file
+                text: systemInstructionInput.value     // You can change system instruction in the config.js file
             }],
         }
     };  
@@ -417,6 +446,8 @@ connectButton.textContent = 'Connect';
 async function handleVideoToggle() {
     Logger.info('Video toggle clicked, current state:', { isVideoActive, isConnected });
     
+    localStorage.setItem('video_fps', fpsInput.value);
+
     if (!isVideoActive) {
         try {
             Logger.info('Attempting to start video');
@@ -424,7 +455,7 @@ async function handleVideoToggle() {
                 videoManager = new VideoManager();
             }
             
-            await videoManager.start((frameData) => {
+            await videoManager.start(fpsInput.value,(frameData) => {
                 if (isConnected) {
                     client.sendRealtimeInput([frameData]);
                 }
