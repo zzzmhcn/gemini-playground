@@ -29,6 +29,18 @@ const screenPreview = document.getElementById('screen-preview');
 const inputAudioVisualizer = document.getElementById('input-audio-visualizer');
 const apiKeyInput = document.getElementById('api-key');
 const voiceSelect = document.getElementById('voice-select');
+const flipCameraButton = document.getElementById('flip-camera');
+
+// Load saved values from localStorage
+const savedApiKey = localStorage.getItem('gemini_api_key');
+const savedVoice = localStorage.getItem('gemini_voice');
+
+if (savedApiKey) {
+    apiKeyInput.value = savedApiKey;
+}
+if (savedVoice) {
+    voiceSelect.value = savedVoice;
+}
 
 // State variables
 let isRecording = false;
@@ -203,11 +215,14 @@ async function resumeAudioContext() {
  * @returns {Promise<void>}
  */
 async function connectToWebsocket() {
-
     if (!apiKeyInput.value) {
         logMessage('Please input API Key', 'system');
         return;
     }
+
+    // Save values to localStorage
+    localStorage.setItem('gemini_api_key', apiKeyInput.value);
+    localStorage.setItem('gemini_voice', voiceSelect.value);
 
     const config = {
         model: CONFIG.API.MODEL_NAME,

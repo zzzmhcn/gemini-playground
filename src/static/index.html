@@ -1,3 +1,9 @@
+<!--
+//Author: ChrisKyle
+//Project: https://github.com/ViaAnthroposBenevolentia/gemini-2-live-api-demo
+//MIT License : https://github.com/ViaAnthroposBenevolentia/gemini-2-live-api-demo/blob/main/LICENSE
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +16,7 @@
 <body>
     <div id="app">
         <div class="settings">
-            <input type="text" id="api-key" placeholder="Please Input Gemini API Key" />
+            <input type="password" id="api-key" placeholder="Please Input Gemini API Key" />
             <select id="voice-select">
                 <option value="Puck">Puck (Male)</option>
                 <option value="Charon">Charon (Male)</option>
@@ -46,6 +52,9 @@
             <video id="preview" playsinline autoplay muted></video>
             <div class="video-controls">
                 <button id="stop-video">Stop Video</button>
+                <button id="flip-camera" style="display: none;">
+                    <span class="material-symbols-outlined">flip_camera_ios</span>
+                </button>
             </div>
         </div>
         <div id="screen-container" style="display: none;">

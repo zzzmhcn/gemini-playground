@@ -40,7 +40,7 @@ export class VideoRecorder {
      * @param {Function} onVideoData - Callback function to receive video frame data.
      * @throws {ApplicationError} Throws an error if the video recording fails to start.
      */
-    async start(previewElement, onVideoData) {
+    async start(previewElement, facingMode, onVideoData, ) {
         try {
             this.previewElement = previewElement;
             this.onVideoData = onVideoData;
@@ -48,6 +48,7 @@ export class VideoRecorder {
             // Request camera access
             this.stream = await navigator.mediaDevices.getUserMedia({ 
                 video: {
+                    facingMode: facingMode,
                     width: { ideal: this.options.width },
                     height: { ideal: this.options.height }
                 }
@@ -106,7 +107,7 @@ export class VideoRecorder {
 
                     this.frameCount++;
                     const size = Math.round(base64Data.length / 1024);
-                    Logger.debug(`Frame #${this.frameCount} captured (${size}KB)`);
+                    //Logger.debug(`Frame #${this.frameCount} captured (${size}KB)`);
                     
                     if (!base64Data) {
                         Logger.error('Empty frame data');

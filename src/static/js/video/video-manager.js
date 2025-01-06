@@ -43,6 +43,30 @@ export class VideoManager {
         this.FORCE_FRAME_INTERVAL = 10; // Send frame every N frames regardless of motion
 
         this.setupFramePreview();
+
+        // 添加摄像头相关状态
+        this.stream = null;
+        this.facingMode = 'user';
+        this.hasMultipleCameras = false;
+        this.onFrame = null;
+        
+        // 获取翻转按钮元素并添加事件监听
+        this.flipCameraButton = document.getElementById('flip-camera');
+        if (!this.flipCameraButton) {
+            throw new ApplicationError(
+                'Flip camera button element not found',
+                ErrorCodes.INVALID_STATE
+            );
+        }
+        
+        // 在构造函数中直接绑定事件
+        this.flipCameraButton.addEventListener('click', async () => {
+            try {
+                await this.flipCamera();
+            } catch (error) {
+                Logger.error('Error flipping camera:', error);
+            }
+        });
     }
 
     /**
@@ -105,13 +129,16 @@ export class VideoManager {
      */
     async start(onFrame) {
         try {
+            await this.checkCameraSupport();
+            this.onFrame = onFrame;
+            
             Logger.info('Starting video manager');
             this.videoContainer.style.display = 'block';
             this.videoRecorder = new VideoRecorder();
-            
-            await this.videoRecorder.start(this.previewVideo, (base64Data) => {
+                        
+            await this.videoRecorder.start(this.previewVideo,this.facingMode, (base64Data) => {
                 if (!this.isActive) {
-                    Logger.debug('Skipping frame - inactive');
+                    //Logger.debug('Skipping frame - inactive');
                     return;
                 }
 
@@ -123,6 +150,8 @@ export class VideoManager {
                 this.processFrame(base64Data, onFrame);
             });
 
+            // 保存stream引用以便后续切换摄像头
+            this.stream = this.videoRecorder.stream;
             this.isActive = true;
             return true;
 
@@ -156,7 +185,7 @@ export class VideoManager {
             if (this.lastFrameData) {
                 const motionScore = this.detectMotion(this.lastFrameData, imageData.data);
                 if (motionScore < this.MOTION_THRESHOLD && this.frameCount % this.FORCE_FRAME_INTERVAL !== 0) {
-                    Logger.debug(`Skipping frame - low motion (score: ${motionScore})`);
+                    //Logger.debug(`Skipping frame - low motion (score: ${motionScore})`);
                     return;
                 }
             }
@@ -169,7 +198,7 @@ export class VideoManager {
             this.frameCount++;
 
             const size = Math.round(base64Data.length / 1024);
-            Logger.debug(`Processing frame (${size}KB) - frame #${this.frameCount}`);
+            //Logger.debug(`Processing frame (${size}KB) - frame #${this.frameCount}`);
 
             onFrame({
                 mimeType: "image/jpeg",
@@ -192,5 +221,47 @@ export class VideoManager {
         this.lastFrameData = null;
         this.lastSignificantFrame = null;
         this.frameCount = 0;
+    }
+
+    async checkCameraSupport() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            this.hasMultipleCameras = videoDevices.length > 1;
+            this.flipCameraButton.style.display = this.hasMultipleCameras ? 'inline-block' : 'none';
+            Logger.info(`Multiple cameras available: ${this.hasMultipleCameras}`);
+        } catch (error) {
+            Logger.error('Error checking camera support:', error);
+            this.hasMultipleCameras = false;
+            this.flipCameraButton.style.display = 'none';
+        }
+    }
+
+    async flipCamera() {
+        if (!this.hasMultipleCameras) {
+            Logger.info('Multiple cameras not available');
+            return;
+        }
+        
+        try {
+            Logger.info('Flipping camera');
+            this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
+            
+            // 停止当前视频流
+            if (this.stream) {
+                this.stream.getTracks().forEach(track => track.stop());
+            }
+            
+            // 重新启动视频流
+            await this.start(this.onFrame);
+            Logger.info('Camera flipped successfully');
+        } catch (error) {
+            Logger.error('Error flipping camera:', error);
+            throw new ApplicationError(
+                'Failed to flip camera',
+                ErrorCodes.VIDEO_FLIP_FAILED,
+                { originalError: error }
+            );
+        }
     }
 }

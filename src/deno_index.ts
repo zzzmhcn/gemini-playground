@@ -49,7 +49,7 @@ async function handleWebSocket(req: Request): Promise<Response> {
   clientWs.onclose = (event) => {
     console.log('Client connection closed');
     if (targetWs.readyState === WebSocket.OPEN) {
-      targetWs.close(event.code, event.reason);
+      targetWs.close(1000, event.reason);
     }
   };
 
@@ -67,6 +67,23 @@ async function handleWebSocket(req: Request): Promise<Response> {
   return response;
 }
 
+async function handleAPIRequest(req: Request): Promise<Response> {
+  try {
+    const worker = await import('./api_proxy/worker.mjs');
+    return await worker.default.fetch(req);
+  } catch (error) {
+    console.error('API request error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorStatus = (error as { status?: number }).status || 500;
+    return new Response(errorMessage, {
+      status: errorStatus,
+      headers: {
+        'content-type': 'text/plain;charset=UTF-8',
+      }
+    });
+  }
+}
+
 async function handleRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
   console.log('Request URL:', req.url);
@@ -76,6 +93,12 @@ async function handleRequest(req: Request): Promise<Response> {
     return handleWebSocket(req);
   }
 
+  if (url.pathname.endsWith("/chat/completions") ||
+      url.pathname.endsWith("/embeddings") ||
+      url.pathname.endsWith("/models")) {
+    return handleAPIRequest(req);
+  }
+
   // 静态文件处理
   try {
     let filePath = url.pathname;
@@ -83,9 +106,7 @@ async function handleRequest(req: Request): Promise<Response> {
       filePath = '/index.html';
     }
 
-    // 修改文件路径以匹配实际目录结构
     const fullPath = `${Deno.cwd()}/src/static${filePath}`;
-    console.log('Trying to read file from:', fullPath);
 
     const file = await Deno.readFile(fullPath);
     const contentType = getContentType(filePath);
