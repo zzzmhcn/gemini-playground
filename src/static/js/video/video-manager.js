@@ -90,11 +90,11 @@ export class VideoManager {
      * @param {string} base64Data - Base64 encoded image data
      * @private
      */
-    updateFramePreview(base64Data) {
+    updateFramePreview(base64Data,width,height) {
         const img = new Image();
         img.onload = () => {
             const ctx = this.framePreview.getContext('2d');
-            ctx.drawImage(img, 0, 0, this.framePreview.width, this.framePreview.height);
+            ctx.drawImage(img, 0, 0, width, height);
         };
         img.src = 'data:image/jpeg;base64,' + base64Data;
     }
@@ -129,7 +129,6 @@ export class VideoManager {
      */
     async start(onFrame) {
         try {
-            await this.checkCameraSupport();
             this.onFrame = onFrame;
             
             Logger.info('Starting video manager');
@@ -178,6 +177,7 @@ export class VideoManager {
             const canvas = document.createElement('canvas');
             canvas.width = img.width;
             canvas.height = img.height;
+            console.log(canvas.width,canvas.height);
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -190,7 +190,10 @@ export class VideoManager {
                 }
             }
 
-            this.updateFramePreview(base64Data);
+            this.framePreviewWidth = Math.round(canvas.width * 0.5);
+            this.framePreviewHeight = Math.round(canvas.height * 0.5);
+
+            this.updateFramePreview(base64Data,this.framePreviewWidth,this.framePreviewHeight);
             
             this.lastFrameData = imageData.data;
             this.lastSignificantFrame = base64Data;
@@ -223,33 +226,13 @@ export class VideoManager {
         this.frameCount = 0;
     }
 
-    async checkCameraSupport() {
-        try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            this.hasMultipleCameras = videoDevices.length > 1;
-            this.flipCameraButton.style.display = this.hasMultipleCameras ? 'inline-block' : 'none';
-            Logger.info(`Multiple cameras available: ${this.hasMultipleCameras}`);
-        } catch (error) {
-            Logger.error('Error checking camera support:', error);
-            this.hasMultipleCameras = false;
-            this.flipCameraButton.style.display = 'none';
-        }
-    }
 
     async flipCamera() {
-        if (!this.hasMultipleCameras) {
-            Logger.info('Multiple cameras not available');
-            return;
-        }
-        
+
         try {
             Logger.info('Flipping camera');
-
-            this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';
-            
-           this.stop();
-
+            this.facingMode = this.facingMode === 'user' ? 'environment' : 'user';         
+            this.stop();
             await this.start(this.onFrame);
             Logger.info('Camera flipped successfully');
         } catch (error) {

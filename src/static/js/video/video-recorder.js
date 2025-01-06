@@ -32,6 +32,8 @@ export class VideoRecorder {
             ...options
         };
         this.frameCount = 0; // Add frame counter for debugging
+        this.actualWidth = 640;
+        this.actualHeight = 480;
     }
 
     /**
@@ -54,13 +56,26 @@ export class VideoRecorder {
                 }
             });
 
+            const videoTrack = this.stream.getVideoTracks()[0];
+            // 获取视频轨道的实际分辨率
+            const settings = videoTrack.getSettings();
+            this.actualWidth = settings.width;
+            this.actualHeight = settings.height;
+
+            // 计算保持宽高比的情况下，限制高度为480的新尺寸
+            if (this.actualHeight > 480) {
+                const aspectRatio = this.actualWidth / this.actualHeight;
+                this.actualHeight = 480;
+                this.actualWidth = Math.round(this.actualHeight * aspectRatio);
+            }
+
+            // 设置画布尺寸
+            this.frameCanvas.width = this.actualWidth;
+            this.frameCanvas.height = this.actualHeight;
+
             // Set up preview
             this.previewElement.srcObject = this.stream;
             await this.previewElement.play();
-
-            // Set up canvas
-            this.frameCanvas.width = this.options.width;
-            this.frameCanvas.height = this.options.height;
 
             // Start frame capture loop
             this.isRecording = true;
@@ -106,8 +121,8 @@ export class VideoRecorder {
                     }
 
                     this.frameCount++;
-                    const size = Math.round(base64Data.length / 1024);
-                    Logger.debug(`Frame #${this.frameCount} captured (${size}KB)`);
+                    //const size = Math.round(base64Data.length / 1024);
+                    //Logger.debug(`Frame #${this.frameCount} captured (${size}KB)`);
                     
                     if (!base64Data) {
                         Logger.error('Empty frame data');
