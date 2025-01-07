@@ -35,7 +35,7 @@ const configContainer = document.getElementById('config-container');
 const systemInstructionInput = document.getElementById('system-instruction');
 systemInstructionInput.value = CONFIG.SYSTEM_INSTRUCTION.TEXT;
 const applyConfigButton = document.getElementById('apply-config');
-
+const responseTypeSelect = document.getElementById('response-type-select');
 
 // Load saved values from localStorage
 const savedApiKey = localStorage.getItem('gemini_api_key');
@@ -256,7 +256,7 @@ async function connectToWebsocket() {
     const config = {
         model: CONFIG.API.MODEL_NAME,
         generationConfig: {
-            responseModalities: "audio",
+            responseModalities: responseTypeSelect.value,
             speechConfig: {
                 voiceConfig: { 
                     prebuiltVoiceConfig: { 

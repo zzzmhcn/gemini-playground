@@ -23,6 +23,19 @@
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tech-shrimp/gemini-playground)
 
+## 本地调试
+
+Windows 安装Deno:
+> irm https://deno.land/install.ps1 | iex
+
+Mac/Linux 安装Deno:
+> curl -fsSL https://deno.land/install.sh | sh
+
+启动项目：
+
+>cd 项目目录 <br>
+>deno run --allow-net --allow-read src/deno_index.ts
+
 
 ## 使用方法
 

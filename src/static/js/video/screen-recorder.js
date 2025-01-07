@@ -24,7 +24,7 @@ export class ScreenRecorder {
         this.captureInterval = null;
         this.previewElement = null;
         this.options = {
-            fps: 5, // Lower FPS for screen sharing
+            fps: 2, // Lower FPS for screen sharing
             quality: 0.8,
             width: 1280,
             height: 720,
