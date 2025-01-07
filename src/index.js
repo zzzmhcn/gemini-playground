@@ -3,6 +3,11 @@ const assetManifest = {};
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // 处理 WebSocket 连接
+    if (request.headers.get('Upgrade') === 'websocket') {
+      return handleWebSocket(request, env);
+    }
     
     // 处理静态资源
     if (url.pathname === '/' || url.pathname === '/index.html') {
@@ -25,10 +30,7 @@ export default {
       });
     }
 
-    // 处理 WebSocket 连接
-    if (request.headers.get('Upgrade') === 'websocket') {
-      return handleWebSocket(request, env);
-    }
+
 
     return new Response('Not found', { status: 404 });
   },
