@@ -1,9 +1,17 @@
 # Gemini 2.0 Flash 游乐场
 
+# [English Version](README_EN.MD)
+
+### 作者：技术爬爬虾
+B站，YouTube，抖音，公众号 全网同名。转载请注明作者。
+
 ## 项目简介
 
-只需准备一个Gemini API Key，即可一键部署一个Gemini多模态对话的网站.
-使用Deno/Cloudflare免费无服务器部署，并且进行了API中转，不限地区/网络环境，打开即用。
+只需准备一个Gemini API Key，10秒即可部署一个Gemini多模态对话的网站。
+不限地区/网络环境，打开即用。
+使用Deno/Cloudflare Worker无服务器免费部署。
+对Gemini Chat API 进行了格式转换，中转为更通用的OpenAI格式，国内直连可用。
+可对接AI编程，接入ChatBox等AI客户端。
 
 ## Deno部署（推荐）
 
@@ -18,10 +26,23 @@
    ![image](/docs/images/1.png)
    </details>
 6. 点击 <b>Deploy Project</b>
+7. 部署成功后获得域名，点开即用。域名同样可以作为Chat API的代理使用。
 
 ## Cloudflare Worker 部署
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/tech-shrimp/gemini-playground)
+1. 点击部署按钮
+2. 登录Cloudflare账号
+3. 填入Account ID，与API Token
+4. Fork本项目，开启Github Action功能
+5. 部署，打开dash.cloudflare.com，查看部署后的worker
+6. 国内使用需要绑定一个自定义域名
+   <details>
+   <summary>如图</summary>
+   
+   ![image](/docs/images/3.png)
+   </details>
+> 国内使用cloudflare有时候可能出现400: User location is not supported for the API use. 可能是粤港地区Cloudflare路由到了香港的CDN节点代理导致的。建议换成Deno部署。
 
 ## 本地调试
 
@@ -38,7 +59,7 @@ Mac/Linux 安装Deno:
 
 
 ## 使用方法
-
+### 多模态对话
 填入API Key, 点击Connect按钮即可对话。
 以下三个按钮分别是：
 - 启用麦克风
@@ -47,7 +68,46 @@ Mac/Linux 安装Deno:
 <br>
 ![image](/docs/images/2.png)
 
-## 感谢：
+### API 代理
+API已经被代理为OpenAI格式，可以直接使用OpenAI格式的API。
+注意替换域名与Gemini API Key。
+
+### Curl:
+```
+curl --location 'https://your.domain.com/v1/chat/completions' \
+--header 'Authorization: Bearer YOUR-GEMINI-API-KEY' \
+--header 'Content-Type: application/json' \
+--data '{
+    "messages": [
+        {
+            "role": "system",
+            "content": "You are a test assistant."
+        },
+        {
+            "role": "user",
+            "content": "Testing. Just say hi and nothing else."
+        }
+    ],
+    "model": "gemini-2.0-flash-exp"
+}'
+```
+### ChatBOX：
+   <details>
+   <summary>如图</summary>
+   
+   ![image](/docs/images/4.png)
+   </details>
+
+### Cursor编程：
+   <details>
+   <summary>如图</summary>
+   
+   ![image](/docs/images/5.png)
+   </details>
+
+
+
+## 致谢/引用：
 
 网站UI： 
 ```

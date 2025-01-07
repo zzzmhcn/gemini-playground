@@ -9,6 +9,13 @@ export default {
       return handleWebSocket(request, env);
     }
     
+    // 添加 API 请求处理
+    if (url.pathname.endsWith("/chat/completions") ||
+        url.pathname.endsWith("/embeddings") ||
+        url.pathname.endsWith("/models")) {
+      return handleAPIRequest(request, env);
+    }
+
     // 处理静态资源
     if (url.pathname === '/' || url.pathname === '/index.html') {
       console.log('Serving index.html',env);
@@ -168,4 +175,21 @@ async function handleWebSocket(request, env) {
    status: 101,
    webSocket: client,
    });
+}
+
+async function handleAPIRequest(request, env) {
+  try {
+    const worker = await import('./api_proxy/worker.mjs');
+    return await worker.default.fetch(request);
+  } catch (error) {
+    console.error('API request error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    const errorStatus = error.status || 500;
+    return new Response(errorMessage, {
+      status: errorStatus,
+      headers: {
+        'content-type': 'text/plain;charset=UTF-8',
+      }
+    });
+  }
 }
